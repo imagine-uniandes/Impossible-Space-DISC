@@ -1,0 +1,1 @@
+C:\Users\palep\Impossible-Space-DISC\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\build\intermediates\cxx\RelWithDebInfo\1k17i1w5\obj\arm64-v8a
