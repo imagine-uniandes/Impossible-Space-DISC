@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(cd \"C:\\\\Users\\\\palep\\\\Impossible-Space-DISC\"; Get-ChildItem -Path \"Assets\\\\Scripts\" -Recurse -Directory | ForEach-Object { $_.FullName.Replace\\(\"C:\\\\Users\\\\palep\\\\Impossible-Space-DISC\\\\\", \"\"\\) } | Sort-Object)"
+    ]
+  }
+}
