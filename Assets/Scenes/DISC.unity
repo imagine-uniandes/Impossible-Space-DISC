@@ -11901,7 +11901,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3752929380758449980, guid: 58e81e4efa9b02d41a97d1feea2901f2, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8997560437557813500, guid: 58e81e4efa9b02d41a97d1feea2901f2, type: 3}
       propertyPath: m_LocalPosition.x
@@ -12004,12 +12004,24 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7703707210606915122, guid: da4ef2ba0b0d13645b92da0da9756280, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 46654144044405500, guid: da4ef2ba0b0d13645b92da0da9756280, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 0}
+    - targetCorrespondingSourceObject: {fileID: 1162208998886117826, guid: da4ef2ba0b0d13645b92da0da9756280, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 0}
+    - targetCorrespondingSourceObject: {fileID: 6694136274789429600, guid: da4ef2ba0b0d13645b92da0da9756280, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 0}
+    - targetCorrespondingSourceObject: {fileID: 5287367843253143672, guid: da4ef2ba0b0d13645b92da0da9756280, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 0}
   m_SourcePrefab: {fileID: 100100000, guid: da4ef2ba0b0d13645b92da0da9756280, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
