@@ -71,3 +71,19 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# Unity Android build backup (generado por Unity, no hace falta en git)
+*BackUpThisFolder_ButDontShipItWithYourGame/
+
+# Unity Burst compilation debug info
+*BurstDebugInformation_DoNotShip/
+*DoNotShip/
+
+# Unity temp incremental build cache
+.utmp/
+
+# APKs de prueba locales (el release va en GitHub Releases)
+*.apk
+
+# Script de desarrollo local
+parse_scene.py
