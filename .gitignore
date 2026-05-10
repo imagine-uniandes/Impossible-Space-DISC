@@ -87,3 +87,6 @@ crashlytics-build.properties
 
 # Script de desarrollo local
 parse_scene.py
+
+# Claude Code local config (no subir al repo)
+.claude/
