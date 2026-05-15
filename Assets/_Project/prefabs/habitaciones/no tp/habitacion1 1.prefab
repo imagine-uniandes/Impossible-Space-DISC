@@ -7266,6 +7266,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ObjectToggler
   targetObjects:
   - {fileID: 8307954586826092999}
+  doorTarget: {fileID: 0}
+  doorAnimationTrigger: Open
+  doorSound: {fileID: 0}
+  doorSoundVolume: 1
   action: 2
   destroyInsteadOfDisable: 0
   useColliderTrigger: 0
@@ -7274,6 +7278,9 @@ MonoBehaviour:
   toggleSound: {fileID: 0}
   volume: 1
   showLogs: 1
+  onActionComplete:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &6209367248516803361
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7982,7 +7989,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1219646079205434276}
   m_Layer: 0
-  m_Name: habitacion1
+  m_Name: habitacion1 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

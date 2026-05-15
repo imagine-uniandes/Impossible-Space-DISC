@@ -5417,7 +5417,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4810589162280022457}
   m_Layer: 0
-  m_Name: habitacion3a
+  m_Name: habitacion3a 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

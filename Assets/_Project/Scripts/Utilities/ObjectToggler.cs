@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using UnityEngine;
+using UnityEngine.Events;
 
 /// <summary>
 /// Script versátil para activar/desactivar GameObjects.
@@ -53,6 +54,10 @@ public class ObjectToggler : MonoBehaviour
     [Header("Visual Feedback")]
     [Tooltip("Mostrar logs en consola")]
     public bool showLogs = true;
+
+    [Header("Completion Event")]
+    [Tooltip("Se invoca cuando la acción termina (después de la animación de puerta, si la hay)")]
+    public UnityEvent onActionComplete;
 
     // Estado interno
     private AudioSource audioSource;
@@ -200,8 +205,9 @@ public class ObjectToggler : MonoBehaviour
         }
 
         PlaySound();
+        onActionComplete?.Invoke();
     }
-    
+
     /// <summary>
     /// Alterna el estado del objeto
     /// </summary>

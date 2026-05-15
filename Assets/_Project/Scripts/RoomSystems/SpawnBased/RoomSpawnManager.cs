@@ -54,7 +54,7 @@ public class RoomSpawnManager : MonoBehaviour
     public int CurrentRoomIndex => currentRoomIndex;
     public GameObject CurrentRoomInstance => currentRoomInstance;
 
-    private void Start()
+    protected virtual void Start()
     {
         Initialize();
     }
@@ -84,7 +84,7 @@ public class RoomSpawnManager : MonoBehaviour
         }
     }
 
-    public void AdvanceToNextRoom()
+    public virtual void AdvanceToNextRoom()
     {
         int nextIndex = currentRoomIndex + 1;
 
@@ -194,7 +194,7 @@ public class RoomSpawnManager : MonoBehaviour
         instance.transform.SetPositionAndRotation(GetSpawnPosition(prefab), GetSpawnRotation(prefab));
     }
 
-    private void AssignManagerToSpawnedTriggers(GameObject roomInstance)
+    protected void AssignManagerToSpawnedTriggers(GameObject roomInstance)
     {
         if (roomInstance == null) return;
 
@@ -211,6 +211,12 @@ public class RoomSpawnManager : MonoBehaviour
         {
             Debug.Log($"<color=cyan>[RoomSpawnManager] 🔗 Triggers vinculados en '{roomInstance.name}': {triggers.Length}</color>");
         }
+    }
+
+    protected void ReleaseCurrentRoom()
+    {
+        ReleasePrevious(currentRoomInstance);
+        currentRoomInstance = null;
     }
 
     private void ReleasePrevious(GameObject previousRoom)
