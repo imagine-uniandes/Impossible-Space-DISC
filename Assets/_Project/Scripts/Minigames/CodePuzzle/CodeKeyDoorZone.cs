@@ -5,6 +5,7 @@ using UnityEngine;
 ///   - Si el código no está resuelto → feedback negativo.
 ///   - Si la llave coincide con el color elegido en el código → abre la puerta via ObjectToggler.
 ///   - Si la llave no coincide → feedback negativo.
+/// Al abrir, la llave queda pegada a la puerta y no puede volver a agarrarse.
 /// </summary>
 [RequireComponent(typeof(Collider))]
 public class CodeKeyDoorZone : MonoBehaviour
@@ -12,6 +13,10 @@ public class CodeKeyDoorZone : MonoBehaviour
     [Header("References")]
     public CodePuzzleManager puzzleManager;
     public ObjectToggler doorToggler;
+
+    [Header("Key Attachment")]
+    [Tooltip("Punto exacto donde la llave queda pegada al abrir. Si está vacío usa el doorTarget del toggler.")]
+    public Transform keyAttachPoint;
 
     [Header("Audio")]
     public AudioClip successSound;
@@ -62,6 +67,7 @@ public class CodeKeyDoorZone : MonoBehaviour
             hasOpened = true;
             PlaySound(successSound);
             doorToggler?.Disable();
+            AttachKeyToDoor(key);
 
             if (showLogs)
                 Debug.Log($"<color=lime>[CodeKeyDoorZone] ✅ Llave '{key.KeyColor}' correcta. Puerta abierta.</color>");
@@ -73,6 +79,44 @@ public class CodeKeyDoorZone : MonoBehaviour
             if (showLogs)
                 Debug.Log($"<color=yellow>[CodeKeyDoorZone] ❌ Llave '{key.KeyColor}' incorrecta. El código dice '{correct}'.</color>");
         }
+    }
+
+    private void AttachKeyToDoor(CodeKey key)
+    {
+        // Determinar punto de anclaje: keyAttachPoint > doorTarget del toggler > esta zona
+        Transform anchor = keyAttachPoint;
+        if (anchor == null && doorToggler != null && doorToggler.doorTarget != null)
+            anchor = doorToggler.doorTarget.transform;
+        if (anchor == null)
+            anchor = transform;
+
+        // Desactivar cualquier componente de grab/interactable (independiente del SDK usado)
+        foreach (Behaviour b in key.GetComponentsInParent<Behaviour>())
+        {
+            string typeName = b.GetType().Name;
+            if (typeName.Contains("Grab") || typeName.Contains("Interactable"))
+                b.enabled = false;
+        }
+
+        // Congelar física
+        Rigidbody rb = key.GetComponentInParent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.isKinematic = true;
+            rb.linearVelocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
+
+        // Pegar al ancla
+        key.transform.SetParent(anchor, worldPositionStays: true);
+
+        if (keyAttachPoint != null)
+        {
+            key.transform.SetPositionAndRotation(keyAttachPoint.position, keyAttachPoint.rotation);
+        }
+
+        if (showLogs)
+            Debug.Log($"<color=cyan>[CodeKeyDoorZone] 🔑 Llave '{key.KeyColor}' pegada a '{anchor.name}'.</color>");
     }
 
     private void PlaySound(AudioClip clip)
