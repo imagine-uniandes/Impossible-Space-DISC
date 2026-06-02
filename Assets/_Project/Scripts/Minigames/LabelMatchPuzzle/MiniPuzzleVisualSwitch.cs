@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Events;
 using TMPro;
 
 /// <summary>
@@ -28,6 +29,10 @@ public class MiniPuzzleVisualSwitch : MonoBehaviour
 
     [Tooltip("Mostrar logs en consola")]
     public bool showLogs = true;
+
+    [Header("Events")]
+    [Tooltip("Se dispara cuando el puzzle se ejecuta correctamente (servidor encendido). Lo usa el audio manager para sus sonidos.")]
+    public UnityEvent onPuzzleExecuted;
 
     private bool hasExecuted;
 
@@ -65,6 +70,8 @@ public class MiniPuzzleVisualSwitch : MonoBehaviour
         }
 
         hasExecuted = true;
+
+        onPuzzleExecuted?.Invoke();
 
         if (showLogs)
         {

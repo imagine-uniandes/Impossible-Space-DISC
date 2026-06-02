@@ -45,6 +45,13 @@ public class LabelMatchPuzzleManager : MonoBehaviour
     [Tooltip("Si está activo, al resolver bien no vuelve a evaluar")]
     public bool lockAfterSuccess = true;
 
+    [Header("Feedback de slots (resaltado con pulso)")]
+    [Tooltip("Al fallar, resalta cada slot con su LabelSlotHighlighter (rojo = mal).")]
+    public bool highlightSlotsOnFail = true;
+
+    [Tooltip("Además del rojo en los incorrectos, resaltar en verde los slots correctos al fallar.")]
+    public bool alsoHighlightCorrectSlots = true;
+
     [Header("Events")]
     [Tooltip("Se invoca cuando todo está correcto (aquí conectas tu script de puerta)")]
     public UnityEvent onPuzzleSolved;
@@ -130,11 +137,62 @@ public class LabelMatchPuzzleManager : MonoBehaviour
         else
         {
             SetResultsVisible(true, false, true);
+
+            if (highlightSlotsOnFail)
+            {
+                HighlightSlotsFeedback();
+            }
+
             onPuzzleFailed?.Invoke();
 
             if (showLogs)
             {
                 Debug.Log("<color=yellow>[LabelMatchPuzzleManager] ⚠️ Hay etiquetas incorrectas. Reacomoda y prueba de nuevo.</color>");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Resalta cada slot según si su etiqueta es correcta (verde) o incorrecta (rojo),
+    /// usando el LabelSlotHighlighter de cada slot. El pulso y su duración se configuran
+    /// en cada highlighter.
+    /// </summary>
+    private void HighlightSlotsFeedback()
+    {
+        if (slots == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < slots.Length; i++)
+        {
+            LabelObjectSlot slot = slots[i];
+            if (slot == null)
+            {
+                continue;
+            }
+
+            // Busca el highlighter en el slot (o sus hijos) y, si no, en la etiqueta
+            // que tiene puesta (la palabra). Así funciona lo pongas donde lo pongas.
+            LabelSlotHighlighter highlighter = slot.GetComponentInChildren<LabelSlotHighlighter>();
+            if (highlighter == null && slot.CurrentLabel != null)
+            {
+                highlighter = slot.CurrentLabel.GetComponentInChildren<LabelSlotHighlighter>();
+            }
+
+            if (highlighter == null)
+            {
+                continue;
+            }
+
+            bool correct = slot.IsCorrect();
+            if (!correct)
+            {
+                highlighter.Flash(false);
+            }
+            else if (alsoHighlightCorrectSlots)
+            {
+                highlighter.Flash(true);
             }
         }
     }

@@ -32,6 +32,18 @@ public class HandheldScanner : MonoBehaviour
     [Range(0f, 3f)]
     public float requiredDwell = 1f;
 
+    [Header("Tolerancia de apuntado")]
+    [Tooltip("Usa un SphereCast (haz con grosor) en vez de un rayo fino. Mucho más fácil acertar a objetos como Séneca sin tener que agrandar tanto el collider.")]
+    public bool useSphereCast = true;
+
+    [Tooltip("Radio del haz al usar SphereCast (metros). Súbelo si cuesta apuntar; bájalo si engancha objetos sin querer.")]
+    [Range(0.01f, 1f)]
+    public float sphereRadius = 0.15f;
+
+    [Header("Iluminación del objetivo")]
+    [Tooltip("Mientras el haz apunta a un objeto con ScannerIlluminable, se enciende su emisión (la linterna 'alumbra' el modelo).")]
+    public bool illuminateOnAim = true;
+
     [Header("Visual del haz")]
     [Tooltip("LineRenderer que dibuja el haz (opcional)")]
     public LineRenderer beam;
@@ -63,6 +75,7 @@ public class HandheldScanner : MonoBehaviour
     private bool isHeld;
     private ScanTarget currentDwellTarget;
     private float dwellTimer;
+    private ScannerIlluminable currentIlluminated;
 
     private void Awake()
     {
@@ -125,25 +138,52 @@ public class HandheldScanner : MonoBehaviour
     private void Update()
     {
         bool scanning = scanOnlyWhileHeld ? isHeld : true;
-        if (!scanning) return;
+        if (!scanning)
+        {
+            UpdateIllumination(null);
+            return;
+        }
 
         Vector3 origin = beamOrigin.position;
         Vector3 dir = beamOrigin.forward;
         Vector3 endPoint = origin + dir * maxDistance;
 
         ScanTarget hitTarget = null;
+        ScannerIlluminable hitIlluminable = null;
 
-        if (Physics.Raycast(origin, dir, out RaycastHit hit, maxDistance, scannableLayers, QueryTriggerInteraction.Collide))
+        RaycastHit hit;
+        bool didHit = useSphereCast
+            ? Physics.SphereCast(origin, sphereRadius, dir, out hit, maxDistance, scannableLayers, QueryTriggerInteraction.Collide)
+            : Physics.Raycast(origin, dir, out hit, maxDistance, scannableLayers, QueryTriggerInteraction.Collide);
+
+        if (didHit)
         {
-            endPoint = hit.point;
+            // SphereCast devuelve point = Vector3.zero si el origen ya solapa el collider; en ese caso dejamos el haz a tope.
+            endPoint = hit.point != Vector3.zero ? hit.point : endPoint;
             hitTarget = hit.collider.GetComponentInParent<ScanTarget>();
+            hitIlluminable = hit.collider.GetComponentInParent<ScannerIlluminable>();
 
             if (showLogs)
-                Debug.Log($"[HandheldScanner] Raycast golpeó '{hit.collider.name}' | ScanTarget: {(hitTarget != null ? hitTarget.name : "ninguno")}");
+                Debug.Log($"[HandheldScanner] Haz golpeó '{hit.collider.name}' | ScanTarget: {(hitTarget != null ? hitTarget.name : "ninguno")}");
         }
 
         UpdateBeam(origin, endPoint);
         ProcessDwell(hitTarget);
+        UpdateIllumination(illuminateOnAim ? hitIlluminable : null);
+    }
+
+    /// <summary>Enciende la emisión del objeto apuntado y apaga el anterior cuando cambia.</summary>
+    private void UpdateIllumination(ScannerIlluminable target)
+    {
+        if (target == currentIlluminated) return;
+
+        if (currentIlluminated != null)
+            currentIlluminated.SetIlluminated(false);
+
+        currentIlluminated = target;
+
+        if (currentIlluminated != null)
+            currentIlluminated.SetIlluminated(true);
     }
 
     private void ProcessDwell(ScanTarget target)
