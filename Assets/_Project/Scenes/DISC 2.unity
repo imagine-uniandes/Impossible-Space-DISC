@@ -3654,7 +3654,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea3f4c442e3a0494cadf2ccb16e402f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AmbientMusicPlayer
-  backgroundMusic: {fileID: 8300000, guid: a0e802150659acc49aff898252195c54, type: 3}
+  backgroundMusic: {fileID: 0}
   volume: 0.25
   crossfadeDuration: 1.5
 --- !u!4 &546185364
@@ -6422,6 +6422,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameTimerDisplay
   prefix: 'TIEMPO  '
+  followActiveAnchor: 1
 --- !u!1 &1091650281
 GameObject:
   m_ObjectHideFlags: 0
@@ -10835,8 +10836,8 @@ MonoBehaviour:
   showLogs: 1
   antechamberPrefabs:
   - {fileID: 3752929380758449980, guid: 58e81e4efa9b02d41a97d1feea2901f2, type: 3}
-  - {fileID: 3752929380758449980, guid: 58e81e4efa9b02d41a97d1feea2901f2, type: 3}
-  - {fileID: 3752929380758449980, guid: 58e81e4efa9b02d41a97d1feea2901f2, type: 3}
+  - {fileID: 3752929380758449980, guid: 2ac25c3895f4e9a48bfff1b08d419372, type: 3}
+  - {fileID: 3752929380758449980, guid: 5b8554b8b5753d24880af8b88e04d478, type: 3}
   transitionDelay: 2
   showTeleportLogs: 1
 --- !u!1 &1916187117

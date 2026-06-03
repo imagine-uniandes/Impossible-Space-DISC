@@ -60,9 +60,7 @@ public class CodeKeyDoorZone : MonoBehaviour
             return;
         }
 
-        string correct = puzzleManager.GetCorrectColor();
-
-        if (string.Equals(key.KeyColor, correct, System.StringComparison.OrdinalIgnoreCase))
+        if (puzzleManager.IsKeyAccepted(key.KeyColor))
         {
             hasOpened = true;
             PlaySound(successSound);
@@ -77,7 +75,7 @@ public class CodeKeyDoorZone : MonoBehaviour
             PlaySound(failSound);
 
             if (showLogs)
-                Debug.Log($"<color=yellow>[CodeKeyDoorZone] ❌ Llave '{key.KeyColor}' incorrecta. El código dice '{correct}'.</color>");
+                Debug.Log($"<color=yellow>[CodeKeyDoorZone] ❌ Llave '{key.KeyColor}' incorrecta. Código: {puzzleManager.GetChosenOperator()} '{puzzleManager.GetCorrectColor()}'.</color>");
         }
     }
 

@@ -29,6 +29,10 @@ public class CodePuzzleManager : MonoBehaviour
     [Tooltip("Solo estos colores tienen llave física. Cualquier otro color será distractor.")]
     public string[] validColors = { "azul", "rojo", "verde" };
 
+    [Header("Operadores válidos")]
+    [Tooltip("Operadores aceptados en el slot de operador. '==' exige la llave del color elegido; '!=' exige una llave de cualquier OTRO color válido.")]
+    public string[] validOperators = { "==", "!=" };
+
     [Header("Feedback de pantalla")]
     public GameObject codeSuccessVisual;
     public GameObject codeErrorVisual;
@@ -47,11 +51,15 @@ public class CodePuzzleManager : MonoBehaviour
 
     private bool isSolved;
     private string correctColor;
+    private string chosenOperator;
 
     public bool IsSolved => isSolved;
 
-    /// <summary>Retorna el color que el usuario eligió y que activa la puerta.</summary>
+    /// <summary>Retorna el color que el usuario eligió en el código.</summary>
     public string GetCorrectColor() => correctColor;
+
+    /// <summary>Retorna el operador que el usuario eligió ('==' o '!=').</summary>
+    public string GetChosenOperator() => chosenOperator;
 
     /// <summary>Llamado automáticamente por los slots al cambiar de estado.</summary>
     public void NotifySlotStateChanged()
@@ -70,22 +78,26 @@ public class CodePuzzleManager : MonoBehaviour
     {
         bool fixedCorrect =
             CheckFixed(objetoSlot) &&
-            CheckFixed(operadorSlot) &&
             CheckFixed(funcionSlot) &&
             CheckFixed(booleanoSlot);
+
+        // El operador es semi-dinámico: aceptamos '==' o '!=' (configurable en validOperators).
+        string chosenOp = operadorSlot != null ? operadorSlot.GetCurrentValue() : string.Empty;
+        bool operatorValid = IsValidOperator(chosenOp);
 
         string chosenColor = colorSlot != null ? colorSlot.GetCurrentValue() : string.Empty;
         bool colorValid = IsValidColor(chosenColor);
 
-        if (fixedCorrect && colorValid)
+        if (fixedCorrect && operatorValid && colorValid)
         {
             correctColor = chosenColor.ToLower();
+            chosenOperator = chosenOp.Trim();
             isSolved = true;
             SetFeedbackVisible(true, false);
             onPuzzleSolved?.Invoke();
 
             if (showLogs)
-                Debug.Log($"<color=lime>[CodePuzzleManager] ✅ Código correcto. Llave ganadora: {correctColor}</color>");
+                Debug.Log($"<color=lime>[CodePuzzleManager] ✅ Código correcto. Operador '{chosenOperator}', color '{correctColor}'.</color>");
         }
         else
         {
@@ -96,6 +108,8 @@ public class CodePuzzleManager : MonoBehaviour
             {
                 if (!fixedCorrect)
                     Debug.Log("<color=yellow>[CodePuzzleManager] ⚠️ Error de sintaxis en el código.</color>");
+                else if (!operatorValid)
+                    Debug.Log($"<color=yellow>[CodePuzzleManager] ⚠️ Operador '{chosenOp}' no válido. Usa == o !=.</color>");
                 else
                     Debug.Log($"<color=yellow>[CodePuzzleManager] ⚠️ Color '{chosenColor}' no tiene llave en la escena.</color>");
             }
@@ -106,6 +120,36 @@ public class CodePuzzleManager : MonoBehaviour
     {
         if (slot == null) return true; // slot no configurado, se ignora
         return slot.IsCorrect();
+    }
+
+    public bool IsValidOperator(string op)
+    {
+        if (string.IsNullOrEmpty(op) || validOperators == null) return false;
+        string trimmed = op.Trim();
+        for (int i = 0; i < validOperators.Length; i++)
+        {
+            if (string.Equals(validOperators[i], trimmed, System.StringComparison.Ordinal))
+                return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Decide si una llave de color dado abre la puerta, según el operador elegido:
+    ///   '==' → solo la llave del color elegido.
+    ///   '!=' → cualquier llave de color válido EXCEPTO el elegido.
+    /// </summary>
+    public bool IsKeyAccepted(string keyColor)
+    {
+        if (!isSolved || string.IsNullOrEmpty(keyColor)) return false;
+
+        bool matchesChosen = string.Equals(keyColor, correctColor, System.StringComparison.OrdinalIgnoreCase);
+
+        if (chosenOperator == "!=")
+            return IsValidColor(keyColor) && !matchesChosen;
+
+        // Por defecto / '==': la llave debe coincidir con el color elegido.
+        return matchesChosen;
     }
 
     private bool IsValidColor(string color)
@@ -141,6 +185,7 @@ public class CodePuzzleManager : MonoBehaviour
     {
         isSolved = false;
         correctColor = string.Empty;
+        chosenOperator = string.Empty;
         SetFeedbackVisible(false, false);
 
         objetoSlot?.ClearCurrentWord(sendToOrigin: true);

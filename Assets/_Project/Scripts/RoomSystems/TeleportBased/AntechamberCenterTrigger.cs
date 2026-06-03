@@ -3,15 +3,23 @@ using TMPro;
 using UnityEngine;
 
 /// <summary>
-/// Sustituye al SpawnTransitionTrigger en el centro de la antecámara.
-/// El jugador debe permanecer dentro del área X segundos para avanzar.
-/// Si sale antes de que termine, el contador se reinicia.
+/// Controla cómo se avanza desde la antecámara a la siguiente sala.
+///
+/// Dos modos (campo advanceByButton):
+///   • Cuenta atrás (por defecto): el jugador permanece en el centro X segundos.
+///     Si sale antes de terminar, el contador se reinicia.
+///   • Botón: cablea el onClick de un botón "Comenzar" a AdvanceNow() y se avanza
+///     al pulsarlo (igual que la sala inicial). La cuenta atrás queda desactivada.
 /// </summary>
 [RequireComponent(typeof(Collider))]
 public class AntechamberCenterTrigger : MonoBehaviour
 {
+    [Header("Modo de avance")]
+    [Tooltip("Si está activo, NO se usa la cuenta atrás del centro: se avanza al pulsar un botón cableado a AdvanceNow() (estilo sala inicial).")]
+    public bool advanceByButton = false;
+
     [Header("Countdown")]
-    [Tooltip("Segundos que el jugador debe permanecer en el centro")]
+    [Tooltip("Segundos que el jugador debe permanecer en el centro (solo si advanceByButton está desactivado)")]
     [Range(1f, 15f)]
     public float countdownSeconds = 5f;
 
@@ -38,6 +46,7 @@ public class AntechamberCenterTrigger : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        if (advanceByButton) return;
         if (hasAdvanced) return;
         if (!IsPlayer(other)) return;
         if (countdownCoroutine != null) return;
@@ -47,6 +56,7 @@ public class AntechamberCenterTrigger : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
+        if (advanceByButton) return;
         if (!IsPlayer(other)) return;
 
         if (countdownCoroutine != null)
@@ -75,10 +85,34 @@ public class AntechamberCenterTrigger : MonoBehaviour
             remaining -= Time.deltaTime;
         }
 
+        countdownCoroutine = null;
+        DoAdvance();
+    }
+
+    /// <summary>
+    /// Avanza a la siguiente sala de inmediato. Pensado para cablearse al onClick
+    /// de un botón "Comenzar" (modo advanceByButton).
+    /// </summary>
+    public void AdvanceNow()
+    {
+        if (hasAdvanced) return;
+
+        if (countdownCoroutine != null)
+        {
+            StopCoroutine(countdownCoroutine);
+            countdownCoroutine = null;
+        }
+
+        DoAdvance();
+    }
+
+    private void DoAdvance()
+    {
+        if (hasAdvanced) return;
+
         if (countdownText != null)
             countdownText.gameObject.SetActive(false);
 
-        countdownCoroutine = null;
         hasAdvanced = true;
 
         if (manager == null)

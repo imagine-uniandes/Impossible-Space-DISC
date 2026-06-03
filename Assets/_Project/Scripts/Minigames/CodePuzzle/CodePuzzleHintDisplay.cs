@@ -23,8 +23,8 @@ public class CodePuzzleHintDisplay : MonoBehaviour
     [Tooltip("Slot objeto incorrecto (se espera 'llave')")]
     public string hintObjeto = "¿Qué tipo de objeto abre puertas?";
 
-    [Tooltip("Slot operador incorrecto (se espera '==')")]
-    public string hintOperador = "¿Debería ser ==? Ese operador compara valores.";
+    [Tooltip("Slot operador incorrecto (se esperan '==' o '!=')")]
+    public string hintOperador = "El operador compara valores. Prueba con == o !=.";
 
     [Tooltip("Slot color: no hay llave de ese color en la sala")]
     public string hintColor = "¿Hay una llave de ese color en la sala?";
@@ -84,7 +84,9 @@ public class CodePuzzleHintDisplay : MonoBehaviour
         if (SlotFilledAndWrong(puzzleManager.objetoSlot))
             return hintObjeto;
 
-        if (SlotFilledAndWrong(puzzleManager.operadorSlot))
+        // El operador es válido si es uno de los aceptados ('==' o '!='), no un valor fijo.
+        if (puzzleManager.operadorSlot != null && puzzleManager.operadorSlot.HasWord
+            && !puzzleManager.IsValidOperator(puzzleManager.operadorSlot.GetCurrentValue()))
             return hintOperador;
 
         // Color: el slot acepta cualquier valor, pero debe existir llave de ese color

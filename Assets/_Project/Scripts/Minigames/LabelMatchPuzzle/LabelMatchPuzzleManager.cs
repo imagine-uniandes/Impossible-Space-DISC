@@ -8,6 +8,16 @@ using TMPro;
 /// </summary>
 public class LabelMatchPuzzleManager : MonoBehaviour
 {
+    /// <summary>
+    /// Acción aplicada a las etiquetas colocadas al resolver el puzzle.
+    /// </summary>
+    public enum LabelOnSolvedAction
+    {
+        None,     // No tocar las etiquetas
+        Disable,  // Desactivar (ocultar) la etiqueta completa
+        Blacken   // Teñir texto/materiales de negro para que se fundan con la oscuridad
+    }
+
     [Header("References")]
     [Tooltip("Slots del puzzle. Si está vacío puede buscarlos automáticamente en hijos.")]
     public LabelObjectSlot[] slots;
@@ -44,6 +54,13 @@ public class LabelMatchPuzzleManager : MonoBehaviour
     [Header("Behavior")]
     [Tooltip("Si está activo, al resolver bien no vuelve a evaluar")]
     public bool lockAfterSuccess = true;
+
+    [Header("Etiquetas al resolver (oscuridad)")]
+    [Tooltip("Qué hacer con las etiquetas colocadas cuando se resuelve el puzzle (justo cuando se apagan las luces), para que no se sigan viendo blancas.")]
+    public LabelOnSolvedAction labelsOnSolved = LabelOnSolvedAction.Blacken;
+
+    [Tooltip("Color al que se tiñe el texto y los materiales de las etiquetas cuando labelsOnSolved = Blacken.")]
+    public Color blackenColor = Color.black;
 
     [Header("Feedback de slots (resaltado con pulso)")]
     [Tooltip("Al fallar, resalta cada slot con su LabelSlotHighlighter (rojo = mal).")]
@@ -129,6 +146,10 @@ public class LabelMatchPuzzleManager : MonoBehaviour
             SetResultsVisible(true, true, false);
             onPuzzleSolved?.Invoke();
 
+            // Justo después de apagar las luces (cableado en onPuzzleSolved),
+            // ocultamos/oscurecemos las etiquetas para que no se sigan viendo.
+            ApplyLabelsOnSolved();
+
             if (showLogs)
             {
                 Debug.Log("<color=lime>[LabelMatchPuzzleManager] ✅ Puzzle resuelto correctamente.</color>");
@@ -193,6 +214,88 @@ public class LabelMatchPuzzleManager : MonoBehaviour
             else if (alsoHighlightCorrectSlots)
             {
                 highlighter.Flash(true);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Aplica la acción configurada (ocultar / ennegrecer) a las etiquetas
+    /// colocadas en los slots. Se llama al resolver el puzzle.
+    /// </summary>
+    private void ApplyLabelsOnSolved()
+    {
+        if (labelsOnSolved == LabelOnSolvedAction.None || slots == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < slots.Length; i++)
+        {
+            LabelObjectSlot slot = slots[i];
+            if (slot == null || slot.CurrentLabel == null)
+            {
+                continue;
+            }
+
+            GameObject labelGo = slot.CurrentLabel.gameObject;
+
+            if (labelsOnSolved == LabelOnSolvedAction.Disable)
+            {
+                labelGo.SetActive(false);
+                continue;
+            }
+
+            BlackenLabel(labelGo);
+        }
+    }
+
+    /// <summary>
+    /// Tiñe de negro todos los textos TMP y materiales de la etiqueta para que
+    /// se funda con la oscuridad cuando se apagan las luces.
+    /// </summary>
+    private void BlackenLabel(GameObject labelGo)
+    {
+        TMP_Text[] texts = labelGo.GetComponentsInChildren<TMP_Text>(true);
+        for (int t = 0; t < texts.Length; t++)
+        {
+            if (texts[t] != null)
+            {
+                texts[t].color = blackenColor;
+            }
+        }
+
+        Renderer[] renderers = labelGo.GetComponentsInChildren<Renderer>(true);
+        for (int r = 0; r < renderers.Length; r++)
+        {
+            if (renderers[r] == null)
+            {
+                continue;
+            }
+
+            Material[] materials = renderers[r].materials;
+            for (int m = 0; m < materials.Length; m++)
+            {
+                Material mat = materials[m];
+                if (mat == null)
+                {
+                    continue;
+                }
+
+                if (mat.HasProperty("_BaseColor"))
+                {
+                    mat.SetColor("_BaseColor", blackenColor);
+                }
+
+                if (mat.HasProperty("_Color"))
+                {
+                    mat.SetColor("_Color", blackenColor);
+                }
+
+                // Si el material emite (etiquetas brillantes), apagamos la emisión.
+                if (mat.HasProperty("_EmissionColor"))
+                {
+                    mat.SetColor("_EmissionColor", Color.black);
+                }
             }
         }
     }
